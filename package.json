@@ -1,0 +1,22 @@
+{
+  "name": "loudred",
+  "version": "0.0.1",
+  "description": "A discord bot that streams audio from a given source. (Hopefully this will solve some of the issues around streaming audio on MacOS, but we'll see)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "keywords": [
+    "discord",
+    "audio"
+  ],
+  "author": "Blair Wilcox <reccanti@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fluent-ffmpeg": "^2.1.2",
+    "install": "^0.13.0",
+    "naudiodon": "^2.2.4",
+    "node-lame": "^1.2.2",
+    "npm": "^6.14.8"
+  }
+}
