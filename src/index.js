@@ -1,16 +1,14 @@
 const portAudio = require("naudiodon");
-const fs = require("fs");
 const ffmpeg = require("fluent-ffmpeg");
 
-const testWriteStream = fs.createWriteStream("out.raw");
-
+console.log(portAudio.getDevices());
 // get the audio from the microphone
 const ai = new portAudio.AudioIO({
   inOptions: {
-    channelCount: 1,
+    channelCount: 16,
     sampleFormat: portAudio.SampleFormat16Bit,
     sampleRate: 44100,
-    deviceId: 1,
+    deviceId: 3,
   },
 });
 
@@ -29,15 +27,21 @@ const ai = new portAudio.AudioIO({
  * customization in the future, but for now it works!
  * ~reccanti 8/20/2020
  */
+// const proc = ffmpeg({ source: ai })
+//   .inputFormat("s16le")
+//   .inputOptions(["-ar 44.1k", "-ac 16"])
+//   .audioCodec("libvorbis")
+//   .outputFormat("oga")
+//   .output("ff.oga");
+
 const proc = ffmpeg({ source: ai })
   .inputFormat("s16le")
-  .inputOptions(["-ar 44.1k", "-ac 1"])
+  .inputOptions(["-ar 44.1k", "-ac 16"])
   .output("ff.mp3");
 
 proc.on("error", (err) => {
   console.log(err);
 });
 
-console.log("start recording");
 ai.start();
 proc.run();

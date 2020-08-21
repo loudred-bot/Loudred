@@ -1,6 +1,7 @@
 /**
  * This is used to send information to the discord bot
  */
+const createAudioReadStream = require("./createAudioStream");
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
@@ -69,6 +70,9 @@ client.on("ready", () => {
       if (channel) {
         const connection = await channel.join();
         connections.set(action.channel, connection);
+
+        const stream = createAudioReadStream();
+        const dispatcher = connection.play(stream);
       }
     }
     if (action.type === "leave") {

@@ -1,10 +1,10 @@
 const portAudio = require("naudiodon");
 const ytdl = require("ytdl-core");
-const { createReadStream } = require("fs");
 const ffmpeg = require("fluent-ffmpeg");
-const { Writable } = require("stream");
+const { Writable, PassThrough } = require("stream");
 
 console.log(portAudio.getDevices());
+const pass = new PassThrough();
 
 // get an input stream
 const ai = new portAudio.AudioIO({
@@ -45,7 +45,9 @@ ffmpeg({ source: ai })
   .inputFormat("s16le")
   .inputOptions(["-ar 44.1k", "-ac 16"])
   .outputFormat("wav")
-  .pipe(ao);
+  .pipe(pass);
+
+pass.pipe(ao);
 
 ai.start();
 ao.start();
