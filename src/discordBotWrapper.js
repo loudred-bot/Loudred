@@ -20,7 +20,7 @@ module.exports = class BotWrapper {
 
   /**
    * A list of channels the bot is active in
-   * Map<Channel, { Server, Connection, Dispatcher }>
+   * Map<Channel, { Server, Connection, Dispatcher, Volume }>
    */
   #channels = new Map();
 
@@ -87,17 +87,22 @@ module.exports = class BotWrapper {
     // create one
     if (!info.dispatcher) {
       const dispatcher = info.connection.play(stream);
-      info.dispatcher = dispatcher;
-      this.#channels.set(voiceChannel, { ...info, dispatcher });
+      const volume = dispatcher.volume;
+      this.#channels.set(voiceChannel, { ...info, dispatcher, volume });
     }
     // otherwise just unpause the current dispatcher
-    else {
-      info.dispatcher.resume();
+    else if (info.volume) {
+      info.dispatcher.setVolume(info.volume);
     }
   }
 
   /**
-   * Silence any stream if we're playing in that voice channel
+   * Silence any stream if we're playing in that voice channel.
+   *
+   * @NOTE Rather than "pause" the stream, we're just going to set the
+   * volume to 0 so that it keeps its time position, since we want
+   * to livestream our audio.
+   * ~reccanti 8/22/2020
    */
   silence(voiceChannel) {
     if (!this.#channels.has(voiceChannel)) {
@@ -105,7 +110,8 @@ module.exports = class BotWrapper {
     }
     const info = this.#channels.get(voiceChannel);
     if (info.dispatcher) {
-      info.dispatcher.pause(true);
+      info.volume = info.dispatcher.volume;
+      info.dispatcher.setVolume(0);
     }
   }
 
