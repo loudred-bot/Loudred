@@ -53,6 +53,39 @@ module.exports = class BotWrapper {
   }
 
   /**
+   * Join a voice channel, as long as we're currently
+   * accepting messages from this server
+   */
+  async join(voiceChannel) {
+    console.log(voiceChannel);
+    if (this.#servers.has(voiceChannel.guild)) {
+      const connection = await voiceChannel.join();
+      const currentChannels = this.#channels.has(voiceChannel.guild)
+        ? this.#channels.get(voiceChannel.guild)
+        : new Set();
+      currentChannels.add(voiceChannel);
+      this.#channels.set(voiceChannel.guild, currentChannels);
+      this.#connections.set(voiceChannel, connection);
+    }
+  }
+
+  /**
+   * Leave a voice channel, as long as we're currently in it
+   * and are maintaining a connection to it.
+   */
+  leave(voiceChannel) {
+    if (
+      this.#channels.has(voiceChannel.guild) &&
+      this.#connections.has(voiceChannel)
+    ) {
+      voiceChannel.leave();
+      const currentChannels = this.#channels.get(voiceChannel.guild);
+      currentChannels.delete(voiceChannel);
+      this.#connections.delete(voiceChannel);
+    }
+  }
+
+  /**
    * Send a text message to the channel, as long as we've
    * joined the server.
    */
@@ -60,5 +93,23 @@ module.exports = class BotWrapper {
     if (channel.type === "text" && this.#servers.has(channel.guild)) {
       channel.send(message);
     }
+  }
+
+  /**
+   * This bot's state is actually kind of complicated and synchronous,
+   * so we want to make sure that everything gets cleaned up if the user
+   * skips a few commands
+   */
+  async #cleanup() {
+    // find all the server channels we're no longer in
+    this.#channels.forEach((channels, server) => {
+      if (!this.#servers.has(server)) {
+        channels.forEach((channel) => {
+          channel.leave();
+        });
+      }
+    });
+    // find any channels we're no longer connected to
+    // find any dispatchers without a matching connection
   }
 };

@@ -16,6 +16,23 @@ const COMMANDS = {
 };
 
 /**
+ * A helper function to get the VoiceChannel from a server
+ * given its name.
+ *
+ * @NOTE Currently, Discord doesn't seem to recognize
+ * voice channels when you type it with a "#" the way it does
+ * text channels. Rather than figure this logic out in the
+ * BotWrapper, I'm leaving it out here so that I can keep it's
+ * API a little neater.
+ * ~reccanti 8/22/2020
+ */
+const getVoiceChannelByName = (server, channelName) => {
+  return server.channels.cache.find(
+    (channel) => channel.type === "voice" && channel.name === channelName
+  );
+};
+
+/**
  * Messages to output to the channel
  */
 const helpMessage = () => {
@@ -92,14 +109,30 @@ async function setup() {
     // a function that we can use to parse messages from our bot into
     // actions that we need to perform.
     const parseBotMessage = (message) => {
+      // create a base message that we'll modify for other
+      // messages. Just so we're not writing a lot of
+      // duplicate code
+      const channel = message.channel;
+      const server = message.channel.guild;
       const baseAction = {
         type: "donothing",
-        channel: message.channel,
-        server: message.channel.guild,
+        channel,
+        server,
       };
+      // ignore any messages that aren't directed to our bot
       if (!message.mentions.users.get(botId)) {
         return baseAction;
       }
+      /**
+       * @TODO Right now, all the commands our bot recognizes
+       * are in the form:
+       *
+       * <botId> <command> <arguments>
+       *
+       * In the future, I may want to support commands that
+       * include spaces
+       * ~reccanti 8/22/2020
+       */
       const messageArgs = message.content.split(" ");
       if (messageArgs[1] === COMMANDS.HELP) {
         return {
@@ -107,28 +140,44 @@ async function setup() {
           type: "help",
         };
       } else if (messageArgs[1] === COMMANDS.JOIN && messageArgs[2]) {
+        const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
+        if (!voiceChannel) {
+          return baseAction;
+        }
         return {
           ...baseAction,
           type: "join",
-          voiceChannel: messageArgs[2],
+          voiceChannel,
         };
       } else if (messageArgs[1] === COMMANDS.LEAVE && messageArgs[2]) {
+        const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
+        if (!voiceChannel) {
+          return baseAction;
+        }
         return {
           ...baseAction,
           type: "leave",
-          voiceChannel: messageArgs[2],
+          voiceChannel,
         };
       } else if (messageArgs[1] === COMMANDS.PLAY && messageArgs[2]) {
+        const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
+        if (!voiceChannel) {
+          return baseAction;
+        }
         return {
           ...baseAction,
           type: "play",
-          voiceChannel: messageArgs[2],
+          voiceChannel,
         };
       } else if (messageArgs[1] === COMMANDS.SILENCE && messageArgs[2]) {
+        const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
+        if (!voiceChannel) {
+          return baseAction;
+        }
         return {
           ...baseAction,
           type: "silence",
-          voiceChannel: messageArgs[2],
+          voiceChannel,
         };
       } else if (messageArgs[1] === COMMANDS.LIST) {
         return {
@@ -150,7 +199,6 @@ async function setup() {
 
     client.on("message", async (message) => {
       const action = parseBotMessage(message);
-      console.log(action);
 
       if (action.type === "activate") {
         const { server, channel } = action;
@@ -165,6 +213,14 @@ async function setup() {
         const { server, channel } = action;
         bot.sendMessage(channel, leaveMessage());
         bot.deactivate(server);
+      }
+      if (action.type === "join") {
+        const { voiceChannel } = action;
+        await bot.join(voiceChannel);
+      }
+      if (action.type === "leave") {
+        const { voiceChannel } = action;
+        bot.leave(voiceChannel);
       }
       //   if (action.type === "list") {
       //     let reply = "Here are the channels I can join: ";
