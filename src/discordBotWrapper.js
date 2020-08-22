@@ -66,9 +66,46 @@ module.exports = class BotWrapper {
    */
   leave(voiceChannel) {
     if (this.#channels.has(voiceChannel)) {
+      // cleanup our connections before leaving the channel
+      const { connection } = this.#channels.get(voiceChannel);
+      connection.disconnect();
+      // leave the channel and remove it from our list
       voiceChannel.leave();
-      // @TODO cleanup connections and dispatchers
       this.#channels.delete(voiceChannel);
+    }
+  }
+
+  /**
+   * If we're in the channel, start streaming audio to it
+   */
+  play(voiceChannel, stream) {
+    if (!this.#channels.has(voiceChannel)) {
+      return;
+    }
+    const info = this.#channels.get(voiceChannel);
+    // if we don't have a dispatcher that's playing audio,
+    // create one
+    if (!info.dispatcher) {
+      const dispatcher = info.connection.play(stream);
+      info.dispatcher = dispatcher;
+      this.#channels.set(voiceChannel, { ...info, dispatcher });
+    }
+    // otherwise just unpause the current dispatcher
+    else {
+      info.dispatcher.resume();
+    }
+  }
+
+  /**
+   * Silence any stream if we're playing in that voice channel
+   */
+  silence(voiceChannel) {
+    if (!this.#channels.has(voiceChannel)) {
+      return;
+    }
+    const info = this.#channels.get(voiceChannel);
+    if (info.dispatcher) {
+      info.dispatcher.pause(true);
     }
   }
 

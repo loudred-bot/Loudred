@@ -104,6 +104,11 @@ async function setup() {
     const botId = client.user.id;
 
     /**
+     * audio stream we'd like to play
+     */
+    const stream = createAudioReadStream();
+
+    /**
      * 3. Setup listeners for the bot to respond to
      */
     // a function that we can use to parse messages from our bot into
@@ -195,6 +200,7 @@ async function setup() {
           type: "deactivate",
         };
       }
+      return baseAction;
     };
 
     client.on("message", async (message) => {
@@ -221,6 +227,14 @@ async function setup() {
       if (action.type === "leave") {
         const { voiceChannel } = action;
         bot.leave(voiceChannel);
+      }
+      if (action.type === "play") {
+        const { voiceChannel } = action;
+        bot.play(voiceChannel, stream);
+      }
+      if (action.type === "silence") {
+        const { voiceChannel } = action;
+        bot.silence(voiceChannel);
       }
       //   if (action.type === "list") {
       //     let reply = "Here are the channels I can join: ";

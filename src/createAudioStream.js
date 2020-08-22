@@ -1,6 +1,7 @@
 const { PassThrough } = require("stream");
 const portAudio = require("naudiodon");
 const ffmpeg = require("fluent-ffmpeg");
+const path = require("path");
 
 module.exports = function createAudioReadStream() {
   const pass = new PassThrough();
@@ -30,12 +31,16 @@ module.exports = function createAudioReadStream() {
    * customization in the future, but for now it works!
    * ~reccanti 8/20/2020
    */
-  ffmpeg({ source: ai })
-    .inputFormat("s16le")
-    .inputOptions(["-ar 44.1k", "-ac 16"])
+  //   ffmpeg({ source: ai })
+  //     .inputFormat("s16le")
+  //     .inputOptions(["-ar 44.1k", "-ac 16"])
+  //     .outputFormat("ogg")
+  //     .pipe(pass);
+
+  ffmpeg(path.resolve(__dirname, "../utena.mp3"))
     .outputFormat("ogg")
     .pipe(pass);
 
-  ai.start();
+  //   ai.start();
   return pass;
 };
