@@ -1,9 +1,8 @@
 # Loudred - Discord Bot for streaming audio
 
-<figure>
-    <img src="./loudred.png" alt="A wild Loudred appeared!" />
-    <figcaption><em>A wild Loudred appeared!</em></figcaption>
-</figure>
+![](./loudred.png)
+
+_A wild Loudred appeared_
 
 > Loudred! Loudred!
 
