@@ -139,12 +139,15 @@ async function setup() {
        * ~reccanti 8/22/2020
        */
       const messageArgs = message.content.split(" ");
+      // help - Display a list of commands
       if (messageArgs[1] === COMMANDS.HELP) {
         return {
           ...baseAction,
           type: "help",
         };
-      } else if (messageArgs[1] === COMMANDS.JOIN && messageArgs[2]) {
+      }
+      // join - join a voice channel with the given name
+      else if (messageArgs[1] === COMMANDS.JOIN && messageArgs[2]) {
         const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
         if (!voiceChannel) {
           return baseAction;
@@ -154,7 +157,9 @@ async function setup() {
           type: "join",
           voiceChannel,
         };
-      } else if (messageArgs[1] === COMMANDS.LEAVE && messageArgs[2]) {
+      }
+      // leave - leave a voice channel with the given name
+      else if (messageArgs[1] === COMMANDS.LEAVE && messageArgs[2]) {
         const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
         if (!voiceChannel) {
           return baseAction;
@@ -164,7 +169,9 @@ async function setup() {
           type: "leave",
           voiceChannel,
         };
-      } else if (messageArgs[1] === COMMANDS.PLAY && messageArgs[2]) {
+      }
+      // play - start playing audio in the specified channel
+      else if (messageArgs[1] === COMMANDS.PLAY && messageArgs[2]) {
         const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
         if (!voiceChannel) {
           return baseAction;
@@ -174,7 +181,9 @@ async function setup() {
           type: "play",
           voiceChannel,
         };
-      } else if (messageArgs[1] === COMMANDS.SILENCE && messageArgs[2]) {
+      }
+      // silence - stop playing audio in the specified channel
+      else if (messageArgs[1] === COMMANDS.SILENCE && messageArgs[2]) {
         const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
         if (!voiceChannel) {
           return baseAction;
@@ -184,17 +193,23 @@ async function setup() {
           type: "silence",
           voiceChannel,
         };
-      } else if (messageArgs[1] === COMMANDS.LIST) {
+      }
+      // list - list all the voice channels the bot can join in the server
+      else if (messageArgs[1] === COMMANDS.LIST) {
         return {
           ...baseAction,
           type: "list",
         };
-      } else if (messageArgs[1] === COMMANDS.ACTIVATE) {
+      }
+      // activate - start listening to commands on the given server
+      else if (messageArgs[1] === COMMANDS.ACTIVATE) {
         return {
           ...baseAction,
           type: "activate",
         };
-      } else if (messageArgs[1] === COMMANDS.DEACTIVATE) {
+      }
+      // deactivate - stop listening for commands on the given server
+      else if (messageArgs[1] === COMMANDS.DEACTIVATE) {
         return {
           ...baseAction,
           type: "deactivate",
@@ -236,30 +251,16 @@ async function setup() {
         const { voiceChannel } = action;
         bot.silence(voiceChannel);
       }
-      //   if (action.type === "list") {
-      //     let reply = "Here are the channels I can join: ";
-      //     voiceChannels.forEach((_value, key) => {
-      //       reply += `\n* ${key}`;
-      //     });
-      //     message.reply(reply);
-      //   }
-      //   if (action.type === "join") {
-      //     const channel = voiceChannels.get(action.channel);
-      //     if (channel) {
-      //       const connection = await channel.join();
-      //       connections.set(action.channel, connection);
+    });
 
-      //       const stream = createAudioReadStream();
-      //       const dispatcher = connection.play(stream);
-      //     }
-      //   }
-      //   if (action.type === "leave") {
-      //     if (connections.has(action.channel)) {
-      //       const connection = connections.get(action.channel);
-      //       connection.disconnect();
-      //       connections.delete(action.channel);
-      //     }
-      //   }
+    /**
+     * Perform some cleanup when we stop the server
+     */
+    process.on("SIGINT", () => {
+      bot.deactivateAll((server) => {
+        const channel = server.systemChannel;
+        bot.sendMessage(channel, "LOUDRED _began to nap!_");
+      });
     });
   });
 

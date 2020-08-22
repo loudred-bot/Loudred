@@ -47,6 +47,17 @@ module.exports = class BotWrapper {
   }
 
   /**
+   * deactivate all servers. Give the user a callback
+   * so they can send any messages
+   */
+  deactivateAll(cb) {
+    this.#servers.forEach((server) => {
+      cb(server);
+      this.deactivate(server);
+    });
+  }
+
+  /**
    * Join a voice channel, as long as we're currently
    * accepting messages from this server
    */
