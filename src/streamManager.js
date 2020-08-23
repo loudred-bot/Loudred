@@ -12,12 +12,12 @@ class StreamManager {
    * The ffmpeg process that converts our raw audio to the ogg/opus
    * format that Discord expects
    */
-  #proc;
+  #proc = null;
 
   /**
    * Our PortAudio input connection
    */
-  #ai;
+  #ai = null;
 
   constructor(device) {
     this.#device = device;
@@ -59,10 +59,14 @@ class StreamManager {
   }
 
   stop() {
-    this.#ai.quit();
-    this.#proc.kill();
-    this.#ai = null;
-    this.#proc = null;
+    if (this.#ai) {
+      this.#ai.quit();
+      this.#ai = null;
+    }
+    if (this.#proc) {
+      this.#proc.kill();
+      this.#proc = null;
+    }
   }
 }
 

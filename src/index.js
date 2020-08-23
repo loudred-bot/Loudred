@@ -1,20 +1,9 @@
 const inquirer = require("inquirer");
 const portAudio = require("naudiodon");
-const createAudioReadStream = require("./createAudioStream");
-require("dotenv").config();
+const Discord = require("discord.js");
+const { DISCORD_CLIENT_TOKEN, COMMANDS, MESSAGES } = require("../config");
 const StreamManager = require("./streamManager");
 const BotWrapper = require("./discordBotWrapper");
-
-const COMMANDS = {
-  HELP: process.env.COMMAND_HELP,
-  LIST: process.env.COMMAND_LIST,
-  JOIN: process.env.COMMAND_JOIN,
-  LEAVE: process.env.COMMAND_LEAVE,
-  PLAY: process.env.COMMAND_PLAY,
-  SILENCE: process.env.COMMAND_SILENCE,
-  ACTIVATE: process.env.COMMAND_ACTIVATE,
-  DEACTIVATE: process.env.COMMAND_DEACTIVATE,
-};
 
 /**
  * A helper function to get the VoiceChannel from a server
@@ -35,26 +24,6 @@ const getVoiceChannelByName = (server, channelName) => {
 
 const getAudioDeviceByName = (name) =>
   portAudio.getDevices().find((device) => device.name === name);
-
-/**
- * Messages to output to the channel
- */
-const helpMessage = () => {
-  let message = [
-    "Loudred Loudred! _(Here's a list of the commands I can use)_",
-    `  - **${COMMANDS.HELP}** - See this list again`,
-    `  - **${COMMANDS.LIST}** - See a list of the voice channels I can join`,
-    `  - **${COMMANDS.JOIN} {channel}** - Join the specified channel`,
-    `  - **${COMMANDS.LEAVE} {channel}** - Leave the specified channel`,
-    `  - **${COMMANDS.PLAY} {channel}** - Start playing audio in the specified channel`,
-    `  - **${COMMANDS.SILENCE} {channel}** - Stop playing audio in the specified channel`,
-    `  - **${COMMANDS.ACTIVATE}** - Start listening for commands on the server`,
-    `  - **${COMMANDS.DEACTIVATE}** - Stop listening for commands on the server`,
-  ];
-  return message.join("\n");
-};
-
-const leaveMessage = () => "_wild_ LOUDRED _ran away_";
 
 /**
  * This is where we set up and run our application. It can be roughly broken
@@ -85,16 +54,12 @@ async function setup() {
 
   const { device: deviceName } = answers;
   const device = getAudioDeviceByName(deviceName);
-  // const stream = createAudioReadStream(device);
   const sm = new StreamManager(device);
 
   /**
    * 2. Initialize and log in to the Discord Client
    */
-  const Discord = require("discord.js");
   const client = new Discord.Client();
-
-  const token = process.env.DISCORD_CLIENT_TOKEN;
 
   /**
    * Right now, everything is initialized inside this "onReady" function.
@@ -224,15 +189,15 @@ async function setup() {
       if (action.type === "activate") {
         const { server, channel } = action;
         bot.activate(server);
-        bot.sendMessage(channel, helpMessage());
+        bot.sendMessage(channel, MESSAGES.HELP);
       }
       if (action.type === "help") {
         const { channel } = action;
-        bot.sendMessage(channel, helpMessage());
+        bot.sendMessage(channel, MESSAGES.HELP);
       }
       if (action.type === "deactivate") {
         const { server, channel } = action;
-        bot.sendMessage(channel, leaveMessage());
+        bot.sendMessage(channel, MESSAGES.LEAVE);
         bot.deactivate(server);
       }
       if (action.type === "join") {
@@ -265,15 +230,13 @@ async function setup() {
       sm.stop();
       bot.deactivateAll((server) => {
         const channel = server.systemChannel;
-        bot.setStatus("idle");
-        console.log("idle");
-        bot.sendMessage(channel, "LOUDRED _began to nap!_");
+        bot.sendMessage(channel, MESSAGES.LEAVE);
       });
-      await bot.setStatus("idle");
+      await bot.setStatus("offline");
     });
   });
 
-  client.login(token);
+  client.login(DISCORD_CLIENT_TOKEN);
 }
 
 setup();
