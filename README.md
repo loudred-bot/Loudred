@@ -77,19 +77,61 @@ For the next step, you'll need to make sure you have the following installed:
 Once you have those installed, clone this repo using the following command:
 
 ```bash
-git clone https://github.com/reccanti/Loudred.git && cd Loudred
+git clone https://github.com/reccanti/Loudred.git
 ```
 
-Then install the npm packages using
+Once that's done, go into the newly created directory:
+
+```bash
+cd Loudred
+```
+
+...and then install its dependencies using
 
 ```bash
 npm install
 ```
 
-### 4. Setup Audio Sources
+## Running Loudred
 
-If the program you're trying to stream supports changing the Audio output device, that's great! Just set that to BlackHole and Loudred will start streaming it to Discord.
+> Loudred! Loudred!
 
-A great example of this is VLC
+Now that we have everything downloaded and installed, we can start the process of setting up and streaming our audio to Discord!
 
-However, not all programs support this, so in that case you need to
+### 1. Setup your Program's Audio Device
+
+#### The Easy Way
+
+> Loudred Loud!
+
+If the program you're trying to stream supports changing the Audio output device, that's great! Just set your program's audio device to `BlackHole` and you're finished.
+
+A great example of this is VLC, which lets you set the output device in its Audio menu like so:
+
+![You can set the output audio Device for VLC by going to `Audio > Audio Device`](./img/VLCAudioDevice.png)
+
+#### The Hard Way
+
+> Loud! Loud!
+
+Unfortunately, not every program supports this or makes it readily available. In this situation, you'll need to get a little more creative.
+
+The first thing you'll need to do is make a Multi-Output Device. This is a device that will direct audio output into multiple sources. We're going to use it to direct audio to both our speakers and BlackHole. Open up the `Audio MIDI Setup` program. Yours should look something like this:
+
+![The Audio MIDI Setup program. It's displaying 3 audio devices: "BlackHole 16ch", "MacBook Pro Microphone", and "MacBook Pro Speakers"](./img/AudioMIDI.png)
+
+Click the "+" button at the bottom and select `Create Multi-Output Device`:
+
+![The "+" menu. It displays 3 options: "Create Aggregate Device", "Create Multi-Output Device", and "Connect AirPlay Device"](./img/CreateMultiOutput.png)
+
+You should now have a Multi-output device! Make sure both "MacBook Pro Speakers" and "BlackHole 16ch" are selected, and make sure "MacBook Pro Speakers" is the Master Device. It should look something like this:
+
+![The Audio MIDI Setup program again, but this time it's displaying a fourth audio device: "Multi-Output Device". The Master Device is set to "MacBook Pro Speakers", and both "MacBook Pro Speakers" and "BlackHole 16ch" are selected](./img/AudioMIDIMulti.png)
+
+Then, right click "Multi-Output Device"'s icon and select "Use This Device For Sound Output":
+
+![The menu that appears when you right click the "Multi-Output Device" icon. It displays the following options: "Configure Device... (disabled)", "Configure Speakers...", "Use This Device For Sound Input (disabled)", "Use This Device For Sound Output", and "Play Alerts and Sound Effects Through This Device"](./img/UseThisDevice.png)
+
+_NOTE: You may not hear any audio if "MacBook Pro Speakers" isn't at the top of your Audio Devices. To fix this, just deselect and reselect "BlackHole 16ch", and that should move it below the speakers_
+
+2. Setup Discord's Audio Device
