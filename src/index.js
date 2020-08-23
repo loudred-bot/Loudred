@@ -32,6 +32,9 @@ const getVoiceChannelByName = (server, channelName) => {
   );
 };
 
+const getAudioDeviceByName = (name) =>
+  portAudio.getDevices().find((device) => device.name === name);
+
 /**
  * Messages to output to the channel
  */
@@ -70,14 +73,18 @@ async function setup() {
   /**
    * 1. Get the Input Device
    */
-  //   const answers = await inquirer.prompt([
-  //     {
-  //       type: "list",
-  //       name: "device",
-  //       message: "Choose the output audio device you'd like to stream to Discord",
-  //       choices: portAudio.getDevices().map((device) => device.name),
-  //     },
-  //   ]);
+  const answers = await inquirer.prompt([
+    {
+      type: "list",
+      name: "device",
+      message: "Choose the output audio device you'd like to stream to Discord",
+      choices: portAudio.getDevices().map((device) => device.name),
+    },
+  ]);
+
+  const { device: deviceName } = answers;
+  const device = getAudioDeviceByName(deviceName);
+  const stream = createAudioReadStream(device);
 
   /**
    * 2. Initialize and log in to the Discord Client
@@ -102,11 +109,6 @@ async function setup() {
      * The ID of the bot, useful for detecting messages
      */
     const botId = client.user.id;
-
-    /**
-     * audio stream we'd like to play
-     */
-    const stream = createAudioReadStream();
 
     /**
      * 3. Setup listeners for the bot to respond to
@@ -266,4 +268,5 @@ async function setup() {
 
   client.login(token);
 }
+
 setup();
