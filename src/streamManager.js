@@ -49,10 +49,22 @@ class StreamManager {
      */
     this.#proc = ffmpeg({ source: this.#ai })
       .inputFormat("s16le")
-      .inputOptions([`-ar ${this.#device.defaultSampleRate}`, `-ac ${2}`])
-      .outputFormat("ogg");
+      .inputOptions([`-ar ${this.#device.defaultSampleRate}`, `-ac ${2}`]);
 
-    this.#proc.pipe(pass);
+    // TEST CODE DELETE LATER
+    // const ao = new portAudio.AudioIO({
+    //   outOptions: {
+    //     channelCount: 2,
+    //     sampleFormat: portAudio.SampleFormat16Bit,
+    //     sampleRate: 44100,
+    //     deviceId: 2,
+    //     closeOnError: false,
+    //   },
+    // });
+    // this.#proc.outputFormat("wav").pipe(ao);
+    // ao.start();
+
+    this.#proc.outputFormat("ogg").pipe(pass);
     this.#ai.start();
 
     return pass;
