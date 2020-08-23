@@ -185,20 +185,24 @@ async function setup() {
 
     client.on("message", async (message) => {
       const action = parseBotMessage(message);
-      console.log(action.type);
 
+      if (action.type === "list") {
+        const { server, channel } = action;
+        const channels = bot.getVoiceChannels(server);
+        await bot.sendMessage(channel, MESSAGES.LIST(channels));
+      }
       if (action.type === "activate") {
         const { server, channel } = action;
         bot.activate(server);
-        bot.sendMessage(channel, MESSAGES.HELP);
+        await bot.sendMessage(channel, MESSAGES.HELP);
       }
       if (action.type === "help") {
         const { channel } = action;
-        bot.sendMessage(channel, MESSAGES.HELP);
+        await bot.sendMessage(channel, MESSAGES.HELP);
       }
       if (action.type === "deactivate") {
         const { server, channel } = action;
-        bot.sendMessage(channel, MESSAGES.LEAVE);
+        await bot.sendMessage(channel, MESSAGES.LEAVE);
         bot.deactivate(server);
       }
       if (action.type === "join") {
@@ -229,11 +233,11 @@ async function setup() {
      */
     process.on("SIGINT", async () => {
       sm.stop();
-      bot.deactivateAll((server) => {
+      bot.deactivateAll(async (server) => {
         const channel = server.systemChannel;
-        bot.sendMessage(channel, MESSAGES.LEAVE);
+        await bot.sendMessage(channel, MESSAGES.INACTIVE);
       });
-      await bot.setStatus("offline");
+      await bot.setStatus("idle");
     });
   });
 

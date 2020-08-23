@@ -74,6 +74,12 @@ const MESSAGES = {
   },
   LEAVE: "_wild_ LOUDRED _ran away_",
   INACTIVE: "LOUDRED _began to nap!_",
+  LIST(channels) {
+    const firstLine =
+      "Loudred! Loud! _(Here's a list of the voice channels I can join)_";
+    const channelList = channels.map((channel) => `- ${channel.name}`);
+    return [firstLine, ...channelList].join("\n");
+  },
 };
 
 module.exports = {

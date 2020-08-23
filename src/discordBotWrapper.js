@@ -62,6 +62,13 @@ module.exports = class BotWrapper {
   }
 
   /**
+   * Return all the voice channels Loudred can join
+   */
+  getVoiceChannels(server) {
+    return server.channels.cache.filter((channel) => channel.type === "voice");
+  }
+
+  /**
    * deactivate all servers. Give the user a callback
    * so they can send any messages
    */
@@ -163,9 +170,9 @@ module.exports = class BotWrapper {
    * Send a text message to the channel, as long as we've
    * joined the server.
    */
-  sendMessage(channel, message) {
+  async sendMessage(channel, message) {
     if (channel.type === "text" && this.#servers.has(channel.guild)) {
-      channel.send(message);
+      await channel.send(message);
     }
   }
 };
