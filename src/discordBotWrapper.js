@@ -25,6 +25,21 @@ module.exports = class BotWrapper {
   #channels = new Map();
 
   /**
+   * User information about the Bot
+   */
+  #user;
+
+  get id() {
+    if (this.#user) {
+      return this.#user.id;
+    }
+  }
+
+  constructor(botUser) {
+    this.#user = botUser;
+  }
+
+  /**
    * Start keeping track of messages from this server
    */
   activate(server) {
@@ -107,6 +122,17 @@ module.exports = class BotWrapper {
     }
   }
 
+  isPlaying(voiceChannel) {
+    if (this.#channels.has(voiceChannel)) {
+      const info = this.#channels.get(voiceChannel);
+      if (info.dispatcher) {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  }
+
   /**
    * Silence any stream if we're playing in that voice channel.
    *
@@ -124,6 +150,13 @@ module.exports = class BotWrapper {
       info.volume = info.dispatcher.volume;
       info.dispatcher.setVolume(0);
     }
+  }
+
+  /**
+   * Sets the Status of the bot
+   */
+  async setStatus(status) {
+    await this.#user.setStatus(status);
   }
 
   /**

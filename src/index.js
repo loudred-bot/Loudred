@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const portAudio = require("naudiodon");
 const createAudioReadStream = require("./createAudioStream");
 require("dotenv").config();
+const StreamManager = require("./streamManager");
 const BotWrapper = require("./discordBotWrapper");
 
 const COMMANDS = {
@@ -84,7 +85,8 @@ async function setup() {
 
   const { device: deviceName } = answers;
   const device = getAudioDeviceByName(deviceName);
-  const stream = createAudioReadStream(device);
+  // const stream = createAudioReadStream(device);
+  const sm = new StreamManager(device);
 
   /**
    * 2. Initialize and log in to the Discord Client
@@ -100,15 +102,11 @@ async function setup() {
    * a manager class for handling these connections
    * ~reccanti 8/21/2020
    */
-  client.on("ready", () => {
+  client.on("ready", async () => {
     console.log("ready");
 
-    const bot = new BotWrapper();
-
-    /**
-     * The ID of the bot, useful for detecting messages
-     */
-    const botId = client.user.id;
+    const bot = new BotWrapper(client.user);
+    await bot.setStatus("online");
 
     /**
      * 3. Setup listeners for the bot to respond to
@@ -127,7 +125,7 @@ async function setup() {
         server,
       };
       // ignore any messages that aren't directed to our bot
-      if (!message.mentions.users.get(botId)) {
+      if (!message.mentions.users.get(bot.id)) {
         return baseAction;
       }
       /**
@@ -243,11 +241,16 @@ async function setup() {
       }
       if (action.type === "leave") {
         const { voiceChannel } = action;
+        if (bot.isPlaying(voiceChannel)) {
+          sm.stop();
+        }
         bot.leave(voiceChannel);
       }
       if (action.type === "play") {
         const { voiceChannel } = action;
-        bot.play(voiceChannel, stream);
+        if (!bot.isPlaying(voiceChannel)) {
+          bot.play(voiceChannel, sm.start());
+        }
       }
       if (action.type === "silence") {
         const { voiceChannel } = action;
@@ -258,11 +261,15 @@ async function setup() {
     /**
      * Perform some cleanup when we stop the server
      */
-    process.on("SIGINT", () => {
+    process.on("SIGINT", async () => {
+      sm.stop();
       bot.deactivateAll((server) => {
         const channel = server.systemChannel;
+        bot.setStatus("idle");
+        console.log("idle");
         bot.sendMessage(channel, "LOUDRED _began to nap!_");
       });
+      await bot.setStatus("idle");
     });
   });
 
