@@ -134,4 +134,40 @@ Then, right click "Multi-Output Device"'s icon and select "Use This Device For S
 
 _NOTE: You may not hear any audio if "MacBook Pro Speakers" isn't at the top of your Audio Devices. To fix this, just deselect and reselect "BlackHole 16ch", and that should move it below the speakers_
 
-2. Setup Discord's Audio Device
+### 2. Setup Discord's Audio Device
+
+> Loudred! Loudred! Loudred!
+
+It sounds like Loudred is getting excited, we're almost done! Our next step is to set Discord's Output Audio Device. This is much easier. To do this, click the "User Settings" gear at the bottom of the client:
+
+![Screenshot showing the location of the User Settings Gear at the bottom of the Discord Client, next to the "Deafen" and "Mute" buttons](./img/UserSettings.png)
+
+and then go to `Voice & Video` and set the Output Device to "MacBook Pro Speakers". Or, if you're wearing headphones, set it to those! The important thing is that you DON'T set your output device to anything that's directing audio to BlackHole, since that will produce an echo. Your configuration should look something like this:
+
+![The Voice Settings Page. We've configured it so that our Output Device is "MacBook Pro Speakers"](./img/ConfiguredVoiceSettings.png)
+
+### 3. Configure and run the bot client
+
+> LOUDRED! LOUDRED!
+
+This is it, the last step! Rename `config.copy.js` to `config.js`. So far so good, but we need to add our client token. Go back to your bot's page in the Discord developer portal you created earlier and click the "Copy" button. Then, in `config.js`, change the value of the `DISCORD_CLIENT_TOKEN` variable from `YOUR CLIENT TOKEN HERE` to the token you copied.
+
+_NOTE: While you're here, feel free to customize anything else about the bot! The names, descriptions, and messages are all customizable._
+
+Now you're ready to run the program! Run this command in your terminal:
+
+```bash
+npm start
+```
+
+You should be met with the following options:
+
+![A menu in the terminal. It asks the question "Choose the output audio device you'd like to stream to Discord" and gives the following options: "BlackHole 16ch", "MackBook Pro Microphone", "MacBook Pro Speakers", and "Multi-Output Device" ](./img/DeviceSelect.png)
+
+Select "BlackHole 16ch". If everything went well, you should see the message "ready" in your terminal.
+
+## Conclusion
+
+> Loudred! Loudred! Loud!
+
+And that's it! You should be able to use Loudred in your Discord Server. Type `@loudred IChooseYou` so that it starts listening for commands from your server. You should get a list of all the commands it can use.
