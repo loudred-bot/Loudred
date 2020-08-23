@@ -66,7 +66,7 @@ const MESSAGES = {
       "Loudred Loudred! _(Here's a list of the commands I can use)_";
     // outputs in the format:
     // - **NAME {ARG1}** - DESCRIPTION
-    const commandDescriptions = COMMANDS.map(
+    const commandDescriptions = Object.values(COMMANDS).map(
       ({ name, args, description }) =>
         `- **${name} ${formatArgs(args)}** - ${description}`
     );

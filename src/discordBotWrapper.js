@@ -157,7 +157,6 @@ module.exports = class BotWrapper {
    */
   async setStatus(status) {
     await this.#user.setStatus(status);
-    console.log(this.#user.presence.status);
   }
 
   /**

@@ -112,7 +112,7 @@ async function setup() {
         };
       }
       // join - join a voice channel with the given name
-      else if (messageArgs[1] === COMMANDS.JOIN && messageArgs[2]) {
+      else if (messageArgs[1] === COMMANDS.JOIN.name && messageArgs[2]) {
         const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
         if (!voiceChannel) {
           return baseAction;
@@ -124,7 +124,7 @@ async function setup() {
         };
       }
       // leave - leave a voice channel with the given name
-      else if (messageArgs[1] === COMMANDS.LEAVE && messageArgs[2]) {
+      else if (messageArgs[1] === COMMANDS.LEAVE.name && messageArgs[2]) {
         const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
         if (!voiceChannel) {
           return baseAction;
@@ -136,7 +136,7 @@ async function setup() {
         };
       }
       // play - start playing audio in the specified channel
-      else if (messageArgs[1] === COMMANDS.PLAY && messageArgs[2]) {
+      else if (messageArgs[1] === COMMANDS.PLAY.name && messageArgs[2]) {
         const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
         if (!voiceChannel) {
           return baseAction;
@@ -148,7 +148,7 @@ async function setup() {
         };
       }
       // silence - stop playing audio in the specified channel
-      else if (messageArgs[1] === COMMANDS.SILENCE && messageArgs[2]) {
+      else if (messageArgs[1] === COMMANDS.SILENCE.name && messageArgs[2]) {
         const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
         if (!voiceChannel) {
           return baseAction;
@@ -160,21 +160,21 @@ async function setup() {
         };
       }
       // list - list all the voice channels the bot can join in the server
-      else if (messageArgs[1] === COMMANDS.LIST) {
+      else if (messageArgs[1] === COMMANDS.LIST.name) {
         return {
           ...baseAction,
           type: "list",
         };
       }
       // activate - start listening to commands on the given server
-      else if (messageArgs[1] === COMMANDS.ACTIVATE) {
+      else if (messageArgs[1] === COMMANDS.ACTIVATE.name) {
         return {
           ...baseAction,
           type: "activate",
         };
       }
       // deactivate - stop listening for commands on the given server
-      else if (messageArgs[1] === COMMANDS.DEACTIVATE) {
+      else if (messageArgs[1] === COMMANDS.DEACTIVATE.name) {
         return {
           ...baseAction,
           type: "deactivate",
@@ -185,6 +185,7 @@ async function setup() {
 
     client.on("message", async (message) => {
       const action = parseBotMessage(message);
+      console.log(action.type);
 
       if (action.type === "activate") {
         const { server, channel } = action;
