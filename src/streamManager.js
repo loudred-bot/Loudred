@@ -51,19 +51,6 @@ class StreamManager {
       .inputFormat("s16le")
       .inputOptions([`-ar ${this.#device.defaultSampleRate}`, `-ac ${2}`]);
 
-    // TEST CODE DELETE LATER
-    // const ao = new portAudio.AudioIO({
-    //   outOptions: {
-    //     channelCount: 2,
-    //     sampleFormat: portAudio.SampleFormat16Bit,
-    //     sampleRate: 44100,
-    //     deviceId: 2,
-    //     closeOnError: false,
-    //   },
-    // });
-    // this.#proc.outputFormat("wav").pipe(ao);
-    // ao.start();
-
     this.#proc.outputFormat("ogg").pipe(pass);
     this.#ai.start();
 

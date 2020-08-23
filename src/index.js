@@ -26,6 +26,24 @@ const getAudioDeviceByName = (name) =>
   portAudio.getDevices().find((device) => device.name === name);
 
 /**
+ * Parses our message string and breaks it down into its components.
+ * Messages are in the format:
+ *
+ * <botId> <command> <argument>
+ *
+ * So this breaks it down into an object in the format
+ * { botId, command, argument }
+ */
+const parseMessageString = (content) => {
+  const [id, command = null, ...args] = content.split(" ");
+  return {
+    id,
+    command,
+    arg: args.length > 0 ? args.join(" ") : null,
+  };
+};
+
+/**
  * This is where we set up and run our application. It can be roughly broken
  * down into the following stages:
  *
@@ -103,17 +121,20 @@ async function setup() {
        * include spaces
        * ~reccanti 8/22/2020
        */
-      const messageArgs = message.content.split(" ");
+      // const messageArgs = message.content.split(" ");
+
+      const contents = parseMessageString(message.content);
+
       // help - Display a list of commands
-      if (messageArgs[1] === COMMANDS.HELP) {
+      if (contents.command === COMMANDS.HELP) {
         return {
           ...baseAction,
           type: "help",
         };
       }
       // join - join a voice channel with the given name
-      else if (messageArgs[1] === COMMANDS.JOIN.name && messageArgs[2]) {
-        const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
+      else if (contents.command === COMMANDS.JOIN.name && contents.arg) {
+        const voiceChannel = getVoiceChannelByName(server, contents.arg);
         if (!voiceChannel) {
           return baseAction;
         }
@@ -124,8 +145,8 @@ async function setup() {
         };
       }
       // leave - leave a voice channel with the given name
-      else if (messageArgs[1] === COMMANDS.LEAVE.name && messageArgs[2]) {
-        const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
+      else if (contents.command === COMMANDS.LEAVE.name && contents.arg) {
+        const voiceChannel = getVoiceChannelByName(server, contents.arg);
         if (!voiceChannel) {
           return baseAction;
         }
@@ -136,8 +157,8 @@ async function setup() {
         };
       }
       // play - start playing audio in the specified channel
-      else if (messageArgs[1] === COMMANDS.PLAY.name && messageArgs[2]) {
-        const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
+      else if (contents.command === COMMANDS.PLAY.name && contents.arg) {
+        const voiceChannel = getVoiceChannelByName(server, contents.arg);
         if (!voiceChannel) {
           return baseAction;
         }
@@ -148,8 +169,8 @@ async function setup() {
         };
       }
       // silence - stop playing audio in the specified channel
-      else if (messageArgs[1] === COMMANDS.SILENCE.name && messageArgs[2]) {
-        const voiceChannel = getVoiceChannelByName(server, messageArgs[2]);
+      else if (contents.command === COMMANDS.SILENCE.name && contents.arg) {
+        const voiceChannel = getVoiceChannelByName(server, contents.arg);
         if (!voiceChannel) {
           return baseAction;
         }
@@ -160,21 +181,21 @@ async function setup() {
         };
       }
       // list - list all the voice channels the bot can join in the server
-      else if (messageArgs[1] === COMMANDS.LIST.name) {
+      else if (contents.command === COMMANDS.LIST.name) {
         return {
           ...baseAction,
           type: "list",
         };
       }
       // activate - start listening to commands on the given server
-      else if (messageArgs[1] === COMMANDS.ACTIVATE.name) {
+      else if (contents.command === COMMANDS.ACTIVATE.name) {
         return {
           ...baseAction,
           type: "activate",
         };
       }
       // deactivate - stop listening for commands on the given server
-      else if (messageArgs[1] === COMMANDS.DEACTIVATE.name) {
+      else if (contents.command === COMMANDS.DEACTIVATE.name) {
         return {
           ...baseAction,
           type: "deactivate",
