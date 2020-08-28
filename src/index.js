@@ -120,6 +120,10 @@ async function setup() {
        * In the future, I may want to support commands that
        * include spaces
        * ~reccanti 8/22/2020
+       *
+       * @UPDATE Commands still can't include spaces,
+       * but arguments can!
+       * ~reccanti 8/28/2020
        */
       // const messageArgs = message.content.split(" ");
 
