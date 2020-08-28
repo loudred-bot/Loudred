@@ -49,3 +49,15 @@ Eventually, I'd like to get unit tests set up for Loudred. However, a lot of tas
 1. Perform the steps in "Setup" and "Happy Path"
 2. Kill the server (ctrl+c)
 3. Loudred should remove itself from the channels it was in.
+
+## Listing Commands
+
+1. Type just `@loudred`
+2. You should see a list of commands Loudred can use
+3. Type `@loudred {HELP}`
+4. You should see the same list
+
+## Listing Voice Channels
+
+1. Type `@loudred {LIST}`
+2. You should see a list of all the voice channels in the current server
