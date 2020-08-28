@@ -233,7 +233,9 @@ async function setup() {
      */
     process.on("SIGINT", async () => {
       sm.stop();
-      bot.deactivateAll();
+      bot.getActiveVoiceChannels().forEach((channel) => {
+        bot.leave(channel);
+      });
       await bot.setStatus("idle");
     });
   });

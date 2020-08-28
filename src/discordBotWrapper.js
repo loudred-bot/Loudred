@@ -1,16 +1,7 @@
 /**
  * Wrapper for our Discord Bot. Used to abstract behavior
- *
- * Methods we need to implement
- * - Help (guild) -> Print a list of commands
- * - List (guild) ->
- * - Activate (guild) -> join server
- * - Deactivate (guild) -> join server
- * - Join (channel) -> join a voice channel
- * - Leave (channel) -> leave a voice channel
- * - Play (channel) -> start sharing audio in a voice channel
- * - Silence (channel) -> stop sharing audio in a voice channel
  */
+
 module.exports = class BotWrapper {
   /**
    * A list of channels the bot is active in
@@ -41,13 +32,11 @@ module.exports = class BotWrapper {
   }
 
   /**
-   * deactivate all servers. Give the user a callback
-   * so they can send any messages
+   * Return a list of all the voice channels the bot is
+   * currently active in
    */
-  deactivateAll() {
-    this.#channels.forEach((channel) => {
-      this.leave(channel);
-    });
+  getActiveVoiceChannels() {
+    return Array.from(this.#channels.keys());
   }
 
   /**
