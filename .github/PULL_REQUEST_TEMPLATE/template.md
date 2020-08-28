@@ -12,4 +12,4 @@
 
 ## Testing
 
-- [ ] Runbook tested
+- [ ] All Runbook tasks passed
