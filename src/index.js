@@ -120,13 +120,17 @@ async function setup() {
        * In the future, I may want to support commands that
        * include spaces
        * ~reccanti 8/22/2020
+       *
+       * @UPDATE Commands still can't include spaces,
+       * but arguments can!
+       * ~reccanti 8/28/2020
        */
       // const messageArgs = message.content.split(" ");
 
       const contents = parseMessageString(message.content);
 
       // help - Display a list of commands
-      if (contents.command === COMMANDS.HELP) {
+      if (!contents.command || contents.command === COMMANDS.HELP.name) {
         return {
           ...baseAction,
           type: "help",
@@ -180,25 +184,11 @@ async function setup() {
           voiceChannel,
         };
       }
-      // list - list all the voice channels the bot can join in the server
+      // list - list the voice channels we can join
       else if (contents.command === COMMANDS.LIST.name) {
         return {
           ...baseAction,
           type: "list",
-        };
-      }
-      // activate - start listening to commands on the given server
-      else if (contents.command === COMMANDS.ACTIVATE.name) {
-        return {
-          ...baseAction,
-          type: "activate",
-        };
-      }
-      // deactivate - stop listening for commands on the given server
-      else if (contents.command === COMMANDS.DEACTIVATE.name) {
-        return {
-          ...baseAction,
-          type: "deactivate",
         };
       }
       return baseAction;
@@ -212,19 +202,9 @@ async function setup() {
         const channels = bot.getVoiceChannels(server);
         await bot.sendMessage(channel, MESSAGES.LIST(channels));
       }
-      if (action.type === "activate") {
-        const { server, channel } = action;
-        bot.activate(server);
-        await bot.sendMessage(channel, MESSAGES.HELP);
-      }
       if (action.type === "help") {
         const { channel } = action;
         await bot.sendMessage(channel, MESSAGES.HELP);
-      }
-      if (action.type === "deactivate") {
-        const { server, channel } = action;
-        await bot.sendMessage(channel, MESSAGES.LEAVE);
-        bot.deactivate(server);
       }
       if (action.type === "join") {
         const { voiceChannel } = action;
@@ -239,7 +219,9 @@ async function setup() {
       }
       if (action.type === "play") {
         const { voiceChannel } = action;
-        if (!bot.isPlaying(voiceChannel)) {
+        if (bot.isPlaying(voiceChannel)) {
+          bot.unSilence(voiceChannel);
+        } else {
           bot.play(voiceChannel, sm.start());
         }
       }
@@ -254,9 +236,8 @@ async function setup() {
      */
     process.on("SIGINT", async () => {
       sm.stop();
-      bot.deactivateAll(async (server) => {
-        const channel = server.systemChannel;
-        await bot.sendMessage(channel, MESSAGES.INACTIVE);
+      bot.getActiveVoiceChannels().forEach((channel) => {
+        bot.leave(channel);
       });
       await bot.setStatus("idle");
     });
