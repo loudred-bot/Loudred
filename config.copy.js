@@ -43,16 +43,6 @@ const COMMANDS = {
     args: ["channel"],
     description: "Stop playing audio in the specified channel",
   },
-  ACTIVATE: {
-    name: "IChooseYou",
-    args: [],
-    description: "Start listening for commands on this server",
-  },
-  DEACTIVATE: {
-    name: "RunAway",
-    args: [],
-    description: "Stop listening for commands on this server",
-  },
   INFO: {
     name: "Stats",
     args: [],
@@ -72,8 +62,6 @@ const MESSAGES = {
     );
     return [firstLine, ...commandDescriptions].join("\n");
   },
-  LEAVE: "_wild_ LOUDRED _ran away_",
-  INACTIVE: "LOUDRED _began to nap!_",
   LIST(channels) {
     const firstLine =
       "Loudred! Loud! _(Here's a list of the voice channels I can join)_";
