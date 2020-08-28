@@ -196,7 +196,6 @@ async function setup() {
 
     client.on("message", async (message) => {
       const action = parseBotMessage(message);
-      console.log(action.type);
 
       if (action.type === "list") {
         const { server, channel } = action;
