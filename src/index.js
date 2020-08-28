@@ -184,11 +184,11 @@ async function setup() {
           voiceChannel,
         };
       }
-      // deactivate - stop listening for commands on the given server
-      else if (contents.command === COMMANDS.DEACTIVATE.name) {
+      // list - list the voice channels we can join
+      else if (contents.command === COMMANDS.LIST.name) {
         return {
           ...baseAction,
-          type: "deactivate",
+          type: "list",
         };
       }
       return baseAction;
