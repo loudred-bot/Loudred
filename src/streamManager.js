@@ -48,6 +48,9 @@ class StreamManager {
      * Breakdown here: https://stackoverflow.com/a/11990796
      */
     this.#proc = ffmpeg({ source: this.#ai })
+      .on("error", (err) => {
+        console.log(err);
+      })
       .inputFormat("s16le")
       .inputOptions([`-ar ${this.#device.defaultSampleRate}`, `-ac ${2}`]);
 

@@ -13,12 +13,6 @@
  */
 module.exports = class BotWrapper {
   /**
-   * A list servers the bot is currently active in
-   * Set<Server>
-   */
-  #servers = new Set();
-
-  /**
    * A list of channels the bot is active in
    * Map<Channel, { Server, Connection, Dispatcher, Volume }>
    */
@@ -40,28 +34,6 @@ module.exports = class BotWrapper {
   }
 
   /**
-   * Start keeping track of messages from this server
-   */
-  activate(server) {
-    this.#servers.add(server);
-  }
-
-  /**
-   * Stop keeping track of the server
-   */
-  deactivate(server) {
-    if (this.#servers.has(server)) {
-      // cleanup channels before we stop listening
-      this.#channels.forEach((channelInfo, channel) => {
-        if (channelInfo.server === server) {
-          this.leave(channel);
-        }
-      });
-      this.#servers.delete(server);
-    }
-  }
-
-  /**
    * Return all the voice channels Loudred can join
    */
   getVoiceChannels(server) {
@@ -72,10 +44,9 @@ module.exports = class BotWrapper {
    * deactivate all servers. Give the user a callback
    * so they can send any messages
    */
-  deactivateAll(cb) {
-    this.#servers.forEach((server) => {
-      cb(server);
-      this.deactivate(server);
+  deactivateAll() {
+    this.#channels.forEach((channel) => {
+      this.leave(channel);
     });
   }
 
@@ -84,13 +55,12 @@ module.exports = class BotWrapper {
    * accepting messages from this server
    */
   async join(voiceChannel) {
-    if (this.#servers.has(voiceChannel.guild)) {
-      const connection = await voiceChannel.join();
-      this.#channels.set(voiceChannel, {
-        server: voiceChannel.guild,
-        connection,
-      });
-    }
+    // if (this.#servers.has(voiceChannel.guild)) {
+    const connection = await voiceChannel.join();
+    this.#channels.set(voiceChannel, {
+      server: voiceChannel.guild,
+      connection,
+    });
   }
 
   /**
@@ -111,9 +81,9 @@ module.exports = class BotWrapper {
   /**
    * If we're in the channel, start streaming audio to it
    */
-  play(voiceChannel, stream) {
+  async play(voiceChannel, stream) {
     if (!this.#channels.has(voiceChannel)) {
-      return;
+      await this.join(voiceChannel);
     }
     const info = this.#channels.get(voiceChannel);
     // if we don't have a dispatcher that's playing audio,
@@ -122,10 +92,6 @@ module.exports = class BotWrapper {
       const dispatcher = info.connection.play(stream);
       const volume = dispatcher.volume;
       this.#channels.set(voiceChannel, { ...info, dispatcher, volume });
-    }
-    // otherwise just unpause the current dispatcher
-    else if (info.volume) {
-      info.dispatcher.setVolume(info.volume);
     }
   }
 
@@ -159,6 +125,17 @@ module.exports = class BotWrapper {
     }
   }
 
+  unSilence(voiceChannel) {
+    if (!this.#channels.has(voiceChannel)) {
+      return;
+    }
+    const info = this.#channels.get(voiceChannel);
+    // otherwise just unpause the current dispatcher
+    if (info.volume) {
+      info.dispatcher.setVolume(info.volume);
+    }
+  }
+
   /**
    * Sets the Status of the bot
    */
@@ -171,7 +148,7 @@ module.exports = class BotWrapper {
    * joined the server.
    */
   async sendMessage(channel, message) {
-    if (channel.type === "text" && this.#servers.has(channel.guild)) {
+    if (channel.type === "text") {
       await channel.send(message);
     }
   }
