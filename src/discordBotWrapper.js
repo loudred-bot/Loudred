@@ -97,10 +97,12 @@ module.exports = class BotWrapper {
   /**
    * Silence any stream if we're playing in that voice channel.
    *
-   * @NOTE Rather than "pause" the stream, we're just going to set the
-   * volume to 0 so that it keeps its time position, since we want
-   * to livestream our audio.
-   * ~reccanti 8/22/2020
+   * @NOTE Because we're using a broadcast, we don't really have
+   * any way of controlling the audio volume, so instead we just
+   * destroy the current dispatcher. A new one will be created
+   * when the user calls "play" again
+   *
+   * ~reccanti 8/29/2020
    */
   silence(voiceChannel) {
     if (!this.#channels.has(voiceChannel)) {
