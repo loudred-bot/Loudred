@@ -78,7 +78,11 @@ module.exports = class BotWrapper {
     // if we don't have a dispatcher that's playing audio,
     // create one
     if (!info.dispatcher) {
-      const dispatcher = info.connection.play(stream, { type: "converted" });
+      const dispatcher = info.connection.play(stream, {
+        type: "converted",
+        bitrate: 44.1,
+        highWaterMark: 30,
+      });
       const volume = dispatcher.volume;
       this.#channels.set(voiceChannel, { ...info, dispatcher, volume });
     }
