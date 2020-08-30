@@ -1,6 +1,6 @@
 {
   "name": "loudred",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A discord bot that streams audio from a given source. (Hopefully this will solve some of the issues around streaming audio on MacOS, but we'll see)",
   "main": "index.js",
   "scripts": {
