@@ -2,7 +2,7 @@ const inquirer = require("inquirer");
 const portAudio = require("naudiodon");
 const Discord = require("discord.js");
 const { DISCORD_CLIENT_TOKEN, COMMANDS, MESSAGES } = require("../config");
-const StreamManager = require("./streamManager");
+const createDeviceBroadcastStream = require("./deviceBroadcastStream");
 const BotWrapper = require("./discordBotWrapper");
 
 /**
@@ -72,7 +72,6 @@ async function setup() {
 
   const { device: deviceName } = answers;
   const device = getAudioDeviceByName(deviceName);
-  const sm = new StreamManager(device);
 
   /**
    * 2. Initialize and log in to the Discord Client
@@ -90,6 +89,8 @@ async function setup() {
 
     const bot = new BotWrapper(client.user);
     await bot.setStatus("online");
+
+    const deviceBroadcast = createDeviceBroadcastStream(client, device);
 
     /**
      * 3. Setup listeners for the bot to respond to
@@ -212,18 +213,11 @@ async function setup() {
       }
       if (action.type === "leave") {
         const { voiceChannel } = action;
-        if (bot.isPlaying(voiceChannel)) {
-          sm.stop();
-        }
         bot.leave(voiceChannel);
       }
       if (action.type === "play") {
         const { voiceChannel } = action;
-        if (bot.isPlaying(voiceChannel)) {
-          bot.unSilence(voiceChannel);
-        } else {
-          bot.play(voiceChannel, sm.start());
-        }
+        await bot.play(voiceChannel, deviceBroadcast);
       }
       if (action.type === "silence") {
         const { voiceChannel } = action;
@@ -235,7 +229,7 @@ async function setup() {
      * Perform some cleanup when we stop the server
      */
     process.on("SIGINT", async () => {
-      sm.stop();
+      deviceBroadcast.end();
       bot.getActiveVoiceChannels().forEach((channel) => {
         bot.leave(channel);
       });

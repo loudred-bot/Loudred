@@ -5,7 +5,7 @@
 module.exports = class BotWrapper {
   /**
    * A list of channels the bot is active in
-   * Map<Channel, { Server, Connection, Dispatcher, Volume }>
+   * Map<Channel, { Server, Connection, Dispatcher }>
    */
   #channels = new Map();
 
@@ -44,8 +44,8 @@ module.exports = class BotWrapper {
    * accepting messages from this server
    */
   async join(voiceChannel) {
-    // if (this.#servers.has(voiceChannel.guild)) {
     const connection = await voiceChannel.join();
+    // connection.on("debug", console.log);
     this.#channels.set(voiceChannel, {
       server: voiceChannel.guild,
       connection,
@@ -70,7 +70,7 @@ module.exports = class BotWrapper {
   /**
    * If we're in the channel, start streaming audio to it
    */
-  async play(voiceChannel, stream) {
+  async play(voiceChannel, broadcast) {
     if (!this.#channels.has(voiceChannel)) {
       await this.join(voiceChannel);
     }
@@ -78,9 +78,8 @@ module.exports = class BotWrapper {
     // if we don't have a dispatcher that's playing audio,
     // create one
     if (!info.dispatcher) {
-      const dispatcher = info.connection.play(stream);
-      const volume = dispatcher.volume;
-      this.#channels.set(voiceChannel, { ...info, dispatcher, volume });
+      const dispatcher = info.connection.play(broadcast);
+      this.#channels.set(voiceChannel, { ...info, dispatcher });
     }
   }
 
@@ -98,30 +97,21 @@ module.exports = class BotWrapper {
   /**
    * Silence any stream if we're playing in that voice channel.
    *
-   * @NOTE Rather than "pause" the stream, we're just going to set the
-   * volume to 0 so that it keeps its time position, since we want
-   * to livestream our audio.
-   * ~reccanti 8/22/2020
+   * @NOTE Because we're using a broadcast, we don't really have
+   * any way of controlling the audio volume, so instead we just
+   * destroy the current dispatcher. A new one will be created
+   * when the user calls "play" again
+   *
+   * ~reccanti 8/29/2020
    */
   silence(voiceChannel) {
     if (!this.#channels.has(voiceChannel)) {
       return;
     }
-    const info = this.#channels.get(voiceChannel);
-    if (info.dispatcher) {
-      info.volume = info.dispatcher.volume;
-      info.dispatcher.setVolume(0);
-    }
-  }
-
-  unSilence(voiceChannel) {
-    if (!this.#channels.has(voiceChannel)) {
-      return;
-    }
-    const info = this.#channels.get(voiceChannel);
-    // otherwise just unpause the current dispatcher
-    if (info.volume) {
-      info.dispatcher.setVolume(info.volume);
+    const { dispatcher, ...info } = this.#channels.get(voiceChannel);
+    if (dispatcher) {
+      dispatcher.destroy();
+      this.#channels.set(voiceChannel, info);
     }
   }
 
