@@ -86,7 +86,7 @@ module.exports = class BotWrapper {
   isPlaying(voiceChannel) {
     if (this.#channels.has(voiceChannel)) {
       const info = this.#channels.get(voiceChannel);
-      if (info.dispatcher && !info.dispatcher.paused) {
+      if (info.dispatcher) {
         return true;
       }
     } else {
